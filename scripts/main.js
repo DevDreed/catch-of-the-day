@@ -14,7 +14,7 @@ var h = require('./helpers');
 
 // Firebase
 var Rebase = require('re-base');
-var base = Rebase.createClass('https://catch-of-the-day-ree.firebaseio.com/')
+var base = Rebase.createClass('https://catch-of-the-day-ree.firebaseio.com/');
 
 /*
 	App
@@ -61,7 +61,9 @@ var App = React.createClass({
 		});
 	},
 	renderFish : function(key){
-		return <Fish key={key} index={key} details={this.state.fishes[key]} addToOrder={this.addToOrder} />
+		return (
+			<Fish key={key} index={key} details={this.state.fishes[key]} addToOrder={this.addToOrder} />
+		)
 	},
 	render: function(){
 		return(
@@ -126,7 +128,7 @@ var AddFishForm = React.createClass({
 				image: this.refs.image.value
 			}
 
-		//3. Add the fish to the App State 
+		//3. Add the fish to the App State
 			this.props.addFish(fish);
 			this.refs.fishForm.reset();
 
@@ -234,7 +236,7 @@ var Inventory = React.createClass({
 	}
 });
 
-/* 
+/*
 	Store Picker
 	This will let us make <StorePicker/>
 */

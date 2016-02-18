@@ -16,16 +16,19 @@ var h = require('./helpers');
 var Rebase = require('re-base');
 var base = Rebase.createClass('https://catch-of-the-day-ree.firebaseio.com/');
 
+var Catalyst = require('react-catalyst');
+
 /*
 	App
 */
 
 var App = React.createClass({
+	mixins: [Catalyst.LinkedStateMixin],
 	getInitialState : function(){
 		return {
 			fishes : {},
 			order : {}
-		}
+		};
 	},
 	componentDidMount: function(){
 		base.syncState(this.props.params.storeId + '/fishes', {
@@ -61,9 +64,7 @@ var App = React.createClass({
 		});
 	},
 	renderFish : function(key){
-		return (
-			<Fish key={key} index={key} details={this.state.fishes[key]} addToOrder={this.addToOrder} />
-		)
+		return <Fish key={key} index={key} details={this.state.fishes[key]} addToOrder={this.addToOrder}/>;	
 	},
 	render: function(){
 		return(
@@ -75,9 +76,9 @@ var App = React.createClass({
 					</ul>
 				</div>
 				<Order fishes={this.state.fishes} order={this.state.order} />
-				<Inventory addFish = {this.addFish} loadSamples={this.loadSamples} />
+				<Inventory addFish = {this.addFish} loadSamples={this.loadSamples} fishes={this.state.fishes} linkState={this.linkState}/>
 			</div>
-			)
+			);
 	}
 
 });
@@ -106,7 +107,7 @@ var Fish = React.createClass({
 					<p>{details.desc}</p>
 					<button disabled={!isAvailable} onClick={this.onButtonClick}>{buttonText}</button>
 				</li>
-			)
+			);
 	}
 });
 
@@ -126,7 +127,7 @@ var AddFishForm = React.createClass({
 				status : this.refs.status.value,
 				desc : this.refs.desc.value,
 				image: this.refs.image.value
-			}
+			};
 
 		//3. Add the fish to the App State
 			this.props.addFish(fish);
@@ -146,9 +147,9 @@ var AddFishForm = React.createClass({
 				<input type="text" ref="image" placeholder="URL to Image" />
 				<button type="submit">+ Add Item</button>
 			</form>
-			)
+			);
 	}
-})
+});
 
 
 /*
@@ -167,7 +168,7 @@ var Header = React.createClass({
 					 Day</h1>
 					<h3 className="tagline"><span>{this.props.tagline}</span></h3>
 				</header>
-			)
+			);
 	}
 });
 
@@ -181,7 +182,7 @@ var Order = React.createClass({
 		var count = this.props.order[key];
 
 		if(!fish){
-			return <li key={key}>Sorry, fish no longer available!</li>
+			return <li key={key}>Sorry, fish no longer available!</li>;
 		}
 
 		return (
@@ -190,7 +191,7 @@ var Order = React.createClass({
 				{fish.name}
 				<span className="price">{h.formatPrice(count * fish.price)}</span>
 			</li>
-			)
+			);
 	},
 	render: function() {
 		var orderIds = Object.keys(this.props.order);
@@ -216,7 +217,7 @@ var Order = React.createClass({
 						</li>
 					</ul>
 				</div>
-			)
+			);
 	}
 });
 
@@ -225,14 +226,32 @@ var Order = React.createClass({
 */
 
 var Inventory = React.createClass({
+	renderInventory: function(key){
+		var linkState = this.props.linkState;
+		return (
+			<div className="fish-edit" key={key}>
+				<input type="text" valueLink={linkState('fishes.'+ key +'.name')} />
+				<input type="text" valueLink={linkState('fishes.'+ key +'.price')} />
+				<select valueLink={linkState('fishes.'+ key +'.status')}>
+					<option value="unavailable">Sold Out!</option>
+					<option value="available">Fresh!</option>
+				</select>
+				<textarea valueLink={linkState('fishes.'+ key +'.desc')}></textarea>
+				<input type="text" valueLink={linkState('fishes.'+ key +'.image')} />
+				<button>Remove Fish</button>
+			</div>
+			);
+	},
 	render: function() {
 		return(
 			<div>
 				<h2>Inventory</h2>
+				{Object.keys(this.props.fishes).map(this.renderInventory)}
+
 				<AddFishForm {...this.props} />
 				<button onClick={this.props.loadSamples}>Load Sample Fishes</button>
 			</div>
-			)
+			);
 	}
 });
 
@@ -259,7 +278,7 @@ var StorePicker = React.createClass({
 				<input type="text" ref="storeId" defaultValue={h.getFunName()} required />
 				<input type="submit" />
 			</form>
-			)
+			);
 	}
 });
 
@@ -270,9 +289,9 @@ var StorePicker = React.createClass({
 
 var NotFound = React.createClass({
 	render : function() {
-		return <h1>Not Found!</h1>
+		return <h1>Not Found!</h1>;
 	}
-})
+});
 
 /*
 	Routes
@@ -285,7 +304,7 @@ var routes = (
 	<Route path="/store/:storeId" component={App} />
 	<Route path="*" component={NotFound} />
 </Router>
-	)
+	);
 
 
 ReactDOM.render(routes, document.querySelector('#main'));
